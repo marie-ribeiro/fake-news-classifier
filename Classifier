@@ -1,7 +1,75 @@
+# LSTM for sequence classification for HOMUS dataset
+import numpy
+import tensorflow as tf
+from keras.layers import Activation
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Conv2D
+from keras.layers import LSTM
+from keras.layers import MaxPooling2D
+from keras.layers import Dropout
+from keras.layers import Flatten
+from keras.layers.embeddings import Embedding
+from keras.preprocessing import sequence
+from keras import optimizers
+from tensorflow.keras import layers
+from keras.layers import TimeDistributed
+from keras.utils.np_utils import to_categorical
+from keras import backend as K
+from keras.layers.merge import concatenate
+from keras.layers import Dense, Input
+print(tf.version.VERSION)
+
 #Preprocessing Data
     #Using the Fake and Real News Dataset
 #Split and Sort Data
 
 #Network
+def networkForArticalType():
+    #Takes genre of article and adds to first model
+    model1_in = Input(shape=(1, 1))
+    model1_out = Dense(4, activation='relu', name='layer2Artical')(model1_in)
+    model1_out = Dense(4, activation="relu")(model1_out)
+    model1 = Model(model1_in, model1_out)
+    return(model1)
+
+def networkForTitle():
+    #Takes titles and adds to second model
+    model2_in = Input(shape=(1, 4))
+    model2_out = LSTM(4, activation='relu',
+                      return_sequences=True, stateful=False, name='layer2Title')(model2_in)
+    model2 = Model(model2_in, model2_out)
+    return(model2)
+
+def networksCombined(model1, model2):
+    #Combines 2 models and gives output
+    concatenated = concatenate([model1.output, model2.output])
+    out = Dense(2, activation='softmax', name='proir_to_output')(concatenated)
+    out = Dense(1, activation='softmax', name='output_layer')(out)
+    model = Model([model1.input, model2.input], outputs = out)
+    return(model)
+    
+model1 = networkForArticalType()
+model2 = networkForTitle()
+model = networksCombined(model1, model2)
+model.compile(loss='categorical_crossentropy',
+              optimizer='Adam',
+              metrics=['accuracy']) 
+model.fit(
+    X_train,
+    y_train,
+    epochs = epochAmount, validation_split=0.1,
+    batch_size = 1,
+    verbose = 2 #Removes warnings
+)
 
 #Testing
+scores = model.evaluate(X_test, y_test, batch_size = 1, verbose=2)
+print("Accuracy: %.2f%%" % (scores[1]*100), flush=True)
+    
+model_json = model.to_json()
+with open("classifierFakeRealNews.json", "w") as json_file:
+    json_file.write(model_json)
+model.save_weights("classifierFakeRealNews.h5")
+print("Saved model to disk", flush=True)

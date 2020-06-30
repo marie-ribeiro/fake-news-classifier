@@ -28,7 +28,9 @@ from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.preprocessing import sequence
 from tensorflow.python.keras.preprocessing import text
 from tensorflow.keras.utils import to_categorical
+#Version should be 2.0.0
 print(tf.version.VERSION)
+seed(32)
 #Preprocessing Data
 #Parameters
 #Limit on the number of features. Using the top 20,000 features
@@ -139,12 +141,12 @@ model.fit(
     X_train,
     Y_train,
     epochs = 10, validation_split=0.1,
-    batch_size = 1,
+    batch_size = 100,
     verbose = 2 #Removes warnings
 )
 
 #Testing
-scores = model.evaluate(X_test, Y_test, batch_size = 1, verbose=2)
+scores = model.evaluate(X_test, Y_test, batch_size = 100, verbose=2)
 print("Accuracy: %.2f%%" % (scores[1]*100), flush=True)
     
 model_json = model.to_json()

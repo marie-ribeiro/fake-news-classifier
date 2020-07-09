@@ -71,6 +71,17 @@ def networkForTitle():
     model2 = Model(model2_in, model2_out)
     return(model2) 
 
+ '''
+    #alternative faster version but lacks lstm--to del
+    global MAX_SEQUENCE_LENGTH
+    #Takes titles and adds to second model
+    model2_in = Input(shape=(MAX_SEQUENCE_LENGTH,))
+    model2_layer1 = Embedding(input_dim=title_vocab_size, output_dim=100, input_length=(MAX_SEQUENCE_LENGTH,))(model2_in)
+    model2_layer2 = Flatten()(model2_layer1)
+    model2_out = Dropout(0.2)(model2_layer2)
+    model2 = Model(model2_in, model2_out) 
+    return(model2)'''
+
 def networksCombined(model1, model2):
     #Combines 2 models and gives output
     concatenated = concatenate([model1.output, model2.output])
